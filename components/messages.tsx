@@ -1,83 +1,61 @@
-import { ChatRequestOptions, Message } from 'ai';
-import { PreviewMessage, ThinkingMessage } from './message';
-import { useScrollToBottom } from './use-scroll-to-bottom';
-import { Overview } from './overview';
-import { memo } from 'react';
-import { Vote } from '@/lib/db/schema';
-import equal from 'fast-deep-equal';
+'use client';
 
-interface MessagesProps {
-  chatId: string;
-  isLoading: boolean;
-  votes: Array<Vote> | undefined;
-  messages: Array<Message>;
-  setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[]),
-  ) => void;
-  reload: (
-    chatRequestOptions?: ChatRequestOptions,
-  ) => Promise<string | null | undefined>;
-  isReadonly: boolean;
-  isArtifactVisible: boolean;
-}
+import { Message } from 'ai';
+import { cn } from '@/lib/utils';
+import { MessageList } from './message-list';
 
-function PureMessages({
-  chatId,
+export function Messages({
+  messages = [],
   isLoading,
+  chatId,
   votes,
-  messages,
   setMessages,
   reload,
   isReadonly,
-}: MessagesProps) {
-  const [messagesContainerRef, messagesEndRef] =
-    useScrollToBottom<HTMLDivElement>();
-
+  isArtifactVisible
+}: {
+  messages: Message[];
+  isLoading?: boolean;
+  chatId: string;
+  votes?: any[];
+  setMessages?: (messages: Message[]) => void;
+  reload?: () => void;
+  isReadonly?: boolean;
+  isArtifactVisible?: boolean;
+}) {
   return (
     <div
-      ref={messagesContainerRef}
-      className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4"
+      className={cn(
+        'pb-[200px] pt-4 md:pt-10',
+        isArtifactVisible ? 'md:pr-[400px]' : ''
+      )}
     >
-      {messages.length === 0 && <Overview />}
-
-      {messages.map((message, index) => (
-        <PreviewMessage
-          key={message.id}
-          index={index}
+      {messages.length > 0 ? (
+        <MessageList
+          messages={messages}
+          isLoading={isLoading}
           chatId={chatId}
-          message={message}
-          isLoading={isLoading && messages.length - 1 === index}
-          vote={
-            votes
-              ? votes.find((vote) => vote.messageId === message.id)
-              : undefined
-          }
+          votes={votes}
           setMessages={setMessages}
           reload={reload}
           isReadonly={isReadonly}
         />
-      ))}
-
-      {isLoading &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user' && <ThinkingMessage />}
-
-      <div
-        ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[24px]"
-      />
+      ) : (
+        <div className="mx-auto max-w-2xl px-4">
+          <div className="rounded-lg border bg-background p-8">
+            <h1 className="mb-2 text-lg font-semibold">
+              Welcome to RedGreenGPT
+            </h1>
+            <p className="mb-2 leading-normal text-muted-foreground">
+              Be mindful of your AI usage - Track and reduce your token consumption
+            </p>
+            <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-md text-amber-900 dark:text-amber-200 text-sm">
+              <strong>Why it matters:</strong> Large language models consume significant energy resources. 
+              By being aware of your token usage, you can help minimize unnecessary AI consumption.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-export const Messages = memo(PureMessages, (prevProps, nextProps) => {
-  if (prevProps.isArtifactVisible && nextProps.isArtifactVisible) return true;
-
-  if (prevProps.isLoading !== nextProps.isLoading) return false;
-  if (prevProps.isLoading && nextProps.isLoading) return false;
-  if (prevProps.messages.length !== nextProps.messages.length) return false;
-  if (!equal(prevProps.messages, nextProps.messages)) return false;
-  if (!equal(prevProps.votes, nextProps.votes)) return false;
-
-  return true;
-});
