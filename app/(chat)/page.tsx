@@ -1,6 +1,27 @@
-import { ChatContainer } from "@/components/chat/chat-container";
+import { cookies } from 'next/headers';
 
-export default function ChatPage() {
+import { Chat } from '@/components/chat';
+import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
+import { generateUUID } from '@/lib/utils';
+import { DataStreamHandler } from '@/components/data-stream-handler';
+
+export default async function ChatPage() {
+  const id = generateUUID();
+
+  const cookieStore = await cookies();
+  const modelIdFromCookie = cookieStore.get('chat-model');
+  
+  const chatComponent = (
+    <Chat
+      key={id}
+      id={id}
+      initialMessages={[]}
+      selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
+      selectedVisibilityType="private"
+      isReadonly={false}
+    />
+  );
+
   return (
     <div className="container flex h-[calc(100vh-4rem)] flex-col">
       <header className="py-4 border-b">
@@ -8,7 +29,8 @@ export default function ChatPage() {
         <p className="text-muted-foreground">Be mindful of your AI usage - Track and reduce your token consumption</p>
       </header>
       <main className="flex flex-1 flex-col">
-        <ChatContainer />
+        {chatComponent}
+        <DataStreamHandler id={id} />
       </main>
     </div>
   );
