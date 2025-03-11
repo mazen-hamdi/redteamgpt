@@ -8,7 +8,7 @@ export default function ChatPage() {
         <p className="text-muted-foreground">Be mindful of your AI usage - Track and reduce your token consumption</p>
       </header>
       <main className="flex flex-1 flex-col">
-        <ChatContainer showTokenCounts={true} />
+        <ChatContainer />
       </main>
     </div>
   );

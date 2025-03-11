@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useChat } from "ai/react";
 import { ChatMessage } from "@/components/chat/message";
 import { ChatPanel } from "@/components/chat/chat-panel";
