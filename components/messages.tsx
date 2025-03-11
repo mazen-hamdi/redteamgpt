@@ -2,7 +2,8 @@
 
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
-import { MessageList } from './message-list';
+// Fix the import path to point to the chat directory
+import { MessageList } from './chat/message-list';
 
 export function Messages({
   messages = [],
