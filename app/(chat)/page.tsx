@@ -11,16 +11,18 @@ export default async function ChatPage() {
   const cookieStore = await cookies();
   const modelIdFromCookie = cookieStore.get('chat-model');
   
-  const chatComponent = (
-    <Chat
-      key={id}
-      id={id}
-      initialMessages={[]}
-      selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
-      selectedVisibilityType="private"
-      isReadonly={false}
-    />
-  );
+  // Add custom styling to hide the default message
+  const customStyles = `
+    <style>
+      /* Hide the default welcome message from AI SDK */
+      .mx-auto.max-w-2xl h1:contains("This is an open source chatbot template") {
+        display: none;
+      }
+      .mx-auto.max-w-2xl a[href*="vercel.com/docs/ai"] {
+        display: none;
+      }
+    </style>
+  `;
 
   return (
     <div className="container flex h-[calc(100vh-4rem)] flex-col">
@@ -29,7 +31,17 @@ export default async function ChatPage() {
         <p className="text-muted-foreground">Be mindful of your AI usage - Track and reduce your token consumption</p>
       </header>
       <main className="flex flex-1 flex-col">
-        {chatComponent}
+        {/* Insert custom styles */}
+        <div dangerouslySetInnerHTML={{ __html: customStyles }} />
+        
+        <Chat
+          key={id}
+          id={id}
+          initialMessages={[]}
+          selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
+          selectedVisibilityType="private"
+          isReadonly={false}
+        />
         <DataStreamHandler id={id} />
       </main>
     </div>
